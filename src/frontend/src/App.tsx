@@ -1,84 +1,102 @@
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Sparkles } from "lucide-react";
-import { motion } from "motion/react";
-import { Footer } from "./components/Footer";
-import { HeroSection } from "./components/HeroSection";
-import { JobListings } from "./components/JobListings";
+import {
+  RouterProvider,
+  createHashHistory,
+  createRootRoute,
+  createRoute,
+  createRouter,
+} from "@tanstack/react-router";
+import { useState } from "react";
+import { AssistantPage } from "./pages/AssistantPage";
+import { ComparePage } from "./pages/ComparePage";
+import { LoginPage } from "./pages/LoginPage";
+import { MarketplacePage } from "./pages/MarketplacePage";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60_000,
-      retry: 1,
-    },
-  },
-});
-
-function NavBar() {
-  return (
-    <motion.header
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50 px-4 py-3"
-    >
-      <nav
-        className="max-w-7xl mx-auto glass rounded-2xl px-5 py-3 flex items-center justify-between"
-        aria-label="Main navigation"
-      >
-        <div className="flex items-center gap-2">
-          <Sparkles
-            className="w-5 h-5"
-            style={{ color: "oklch(0.88 0.15 78)" }}
-          />
-          <span className="text-2xl font-display font-black gold-text tracking-tight">
-            FAITH
-          </span>
-        </div>
-        <div className="hidden md:flex items-center gap-6">
-          {[
-            { href: "#jobs", label: "Browse Jobs" },
-            { href: "#about", label: "About" },
-            { href: "#contact", label: "Contact" },
-          ].map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-sm font-heading text-muted-foreground hover:text-foreground transition-colors"
-              data-ocid="nav.link"
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>
-        <a
-          href="#jobs"
-          className="text-sm font-heading text-white px-4 py-2 rounded-xl transition-opacity hover:opacity-90"
-          style={{
-            background:
-              "linear-gradient(135deg, oklch(0.55 0.22 295), oklch(0.82 0.16 78 / 0.8))",
-          }}
-          data-ocid="nav.primary_button"
-        >
-          Find a Job
-        </a>
-      </nav>
-    </motion.header>
-  );
+export interface User {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
 }
 
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 60_000, retry: 1 } },
+});
+
 export default function App() {
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const stored = localStorage.getItem("pricehunt_user");
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [cartCount, setCartCount] = useState(0);
+
+  const login = (u: User) => {
+    setUser(u);
+    localStorage.setItem("pricehunt_user", JSON.stringify(u));
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("pricehunt_user");
+  };
+
+  const rootRoute = createRootRoute();
+
+  const loginRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/",
+    component: () => <LoginPage onLogin={login} user={user} />,
+  });
+
+  const compareRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/compare",
+    component: () => (
+      <ComparePage user={user} onLogout={logout} cartCount={cartCount} />
+    ),
+  });
+
+  const marketplaceRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/marketplace",
+    component: () => (
+      <MarketplacePage
+        user={user}
+        onLogout={logout}
+        cartCount={cartCount}
+        onAddToCart={() => setCartCount((c) => c + 1)}
+      />
+    ),
+  });
+
+  const assistantRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/assistant",
+    component: () => (
+      <AssistantPage user={user} onLogout={logout} cartCount={cartCount} />
+    ),
+  });
+
+  const routeTree = rootRoute.addChildren([
+    loginRoute,
+    compareRoute,
+    marketplaceRoute,
+    assistantRoute,
+  ]);
+
+  const router = createRouter({
+    routeTree,
+    history: createHashHistory(),
+  });
+
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen mesh-bg">
-        <NavBar />
-        <main>
-          <HeroSection />
-          <JobListings />
-        </main>
-        <Footer />
-      </div>
+      <RouterProvider router={router} />
       <Toaster richColors position="top-right" />
     </QueryClientProvider>
   );

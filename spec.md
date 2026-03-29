@@ -1,16 +1,16 @@
-# FAITH - Job Portal for Orphans & Semi-Orphans
+# PriceHunt - E-Commerce Price Comparison & Marketplace
 
 ## Current State
-New project. No existing code.
+New project. No existing files.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Landing hero section with FAITH branding, tagline for orphans/semi-orphans
-- Job listings page: shows job title, distance, salary, shift timing (day/night), gender preference
-- Job application form with: name, date of birth, phone number, address, gender, preferred timing (day/night), job timing, expected salary, agreement/consent checkbox
-- Sample job listings with colorful cards
-- Agreement modal before submitting application
+- **Login/Signup page**: Interactive auth page with name, email, password, phone number, full address fields. Animated, colorful design.
+- **Price Comparison page**: Search for a product and see simulated price results from Amazon, Flipkart, Meesho, Ajio, Snapdeal with price, delivery time, ratings, and a "Buy Now" link button for each platform.
+- **Marketplace / Sell page**: Sellers can upload a product with image, name, description, price, category, delivery estimate. Buyers can browse and purchase listed products.
+- **AI Assistant page**: Chat interface with an AI assistant that helps users find deals, compare products, and answer shopping questions (simulated responses with smart pre-built Q&A + keyword matching).
+- **Navigation**: Top navbar with links to all 4 pages, user profile display after login.
 
 ### Modify
 N/A
@@ -19,5 +19,8 @@ N/A
 N/A
 
 ## Implementation Plan
-1. Backend: store job listings and job applications
-2. Frontend: FAITH branded hero, colorful job cards with distance/salary/timing info, application form modal with all required fields, agreement checkbox
+1. Backend: User profiles (signup/login), product listings (create/read), marketplace orders (buy intent), price comparison data (simulated per product query)
+2. Frontend pages: Login/Signup, Price Comparison, Marketplace, AI Assistant
+3. Components: authorization (login/signup), blob-storage (product image uploads), http-outcalls (optional for real pricing, use simulated fallback)
+4. Auth gate: price comparison and marketplace require login
+5. AI assistant: rule-based response system with shopping context
